@@ -1,4 +1,5 @@
 import telebot
+import datetime
 from telebot import types
 
 from config import Config
@@ -7,6 +8,7 @@ bot = telebot.TeleBot(token = Config.token)
 
 inten = 1
 porth = 15
+
 @bot.message_handler(commands=['start'])
 def indification(message):
     bot.send_message(message.chat.id,
@@ -19,18 +21,25 @@ def info(message):
         vibor(message)
     if message.text.lower() == 'аналитика 📊':
         analitic(message)
-    if message.text.lower() == 'изменение информации 📑':
+    if message.text.lower() == 'информация 📑':
         edit(message)
     if message.text.lower() == 'интенсивность потока ☄':
         intens(message)
     if message.text.lower() == 'сейчас ⏰':
         now(message)
+    if message.text.lower() == 'день ☀':
+        bot.send_message(message.chat.id, 'Прошло недостаточно времени для формирования отчета')
+    if message.text.lower() == 'неделя 📅':
+        bot.send_message(message.chat.id, 'Прошло недостаточно времени для формирования отчета')
+
+
+
 @bot.message_handler()
 def vibor(message):
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton('Интенсивность потока ☄')
-    btn2 = types.KeyboardButton('Изменение информации 📑')
+    btn2 = types.KeyboardButton('Информация 📑')
 
     btn3 = types.KeyboardButton('Аналитика 📊')
 
@@ -59,24 +68,34 @@ def edit(message):
     markup.add(btn5)
 
     bot.send_message(message.chat.id, 'В этом разделе вы можете просмтреть инфомацию о времени работы ресторана', reply_markup=markup)
+    bot.send_message(message.chat.id, 'Состояние: Открыто')
 def intens(message):
     global inten
-    if inten == 1:
+    with open(r"C:\Users\user\PycharmProjects\pythonProject10\output.txt", "r") as file: #указать файл с output.txt нейросети
+        content = file.read()
+        content = int(content)
+    if content < 3:
         photo = open('inten\one.png', 'rb')
-    if inten == 2:
+    elif content < 5:
         photo = open('inten\small.png', 'rb')
-    if inten == 3:
+    elif content < 7:
         photo = open('inten\cramped.png', 'rb')
-    if inten == 4:
-        photo = open('inten\inten_impossible.JPEG', 'rb')
+    elif content < 10:
+        photo = open('inten\many.png', 'rb')
+    elif content < 15:
+        photo = open('inten\mostmany.png', 'rb')
+    elif content >= 15:
+        photo = open('inten\six.png', 'rb')
+
     bot.send_photo(message.chat.id, photo)
     photo.close()
-    pass
+
 def now(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn5 = types.KeyboardButton('◀ Назад')
 
-    markup.add(btn5)
+    with open(r"C:\Users\user\PycharmProjects\pythonProject10\output.txt", "r") as file: #указать файл с output.txt нейросети
+        content = file.read()
+        content = int(content)
+    bot.send_message(message.chat.id, f'На данный момент в столовой находится {content} человек(а)')
 
-    bot.send_message(message.chat.id, f'На данный момент в столовой находится {porth} человек, поэтому стоит немного подождать', reply_markup=markup)
+
 bot.infinity_polling()
