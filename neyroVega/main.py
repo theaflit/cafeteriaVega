@@ -39,7 +39,8 @@ while True:
     a = results[0].boxes.data
     px = pd.DataFrame(a).astype("float")
 
-    list = []
+    list = [] #общее колиечстов людей
+    peo = [] #количество людей в зоне очереди
     for index, row in px.iterrows():
  
         x1 = int(row[0])
@@ -52,6 +53,7 @@ while True:
         if 'person' in c: #обозначение боксов обнаружение человека
             list.append([x1, y1, x2, y2])
         bbox_idx = tracker.update(list)
+
         for bbox in bbox_idx:
             x3, y3, x4, y4, id = bbox
             result = cv2.pointPolygonTest(np.array(area1,np.int32), (x4, y4), False)
@@ -59,6 +61,11 @@ while True:
                 cv2.circle(frame, (x4, y4), 4, (100, 0, 255), -1)
                 cv2.rectangle(frame, (x3, y3), (x4, y4), (255, 255, 255), 2)
                 cvzone.putTextRect(frame, f'{id}', (x3, y3), 1, 1)
+                peo.append([x1, y1, x2, y2])
+        #print(len(peo), "- человек внутри очереди")
+        with open("output.txt", "w") as file:
+            file.write(str(len(peo))) #записываем количество людей в файл для дальнейщего использования
+        peo = []
 
     cv2.polylines(frame, [np.array(area1, np.int32)], True, (0,255,0), 1)
     cv2.imshow("RGB", frame)
